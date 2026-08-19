@@ -69,16 +69,10 @@ public class AuthServiceImpl implements AuthService {
         // 4. GET ROLE
         // =====================================================
 
-        String role = user.getUserRole();
-
-        if (role == null || role.isBlank()) {
-
-            throw new InvalidCredentialsException(
-                    "User role is not configured"
-            );
+        if (user.getRole() == null) {
+            throw new InvalidCredentialsException("User role is not configured");
         }
-
-        role = role.toUpperCase();
+        String role = user.getRole().getRoleName().toUpperCase();
 
 
         // =====================================================
