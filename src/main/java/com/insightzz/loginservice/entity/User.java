@@ -18,10 +18,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
-    @Column(name = "user_name", nullable = false)
-    private String userName;
+//    @Column(name = "user_name", nullable = false)
+//    private String userName;
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -53,4 +53,7 @@ public class User {
 
     @Column(name = "update_datetime")
     private LocalDateTime updateDatetime;
+
+    @Column(name = "token_version", nullable = false)
+    private Long tokenVersion;
 }

@@ -7,10 +7,42 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(
+            ProjectAuthorizationUnavailableException.class
+    )
+    public ResponseEntity<Map<String, Object>>
+    handleProjectAuthorizationUnavailable(
+            ProjectAuthorizationUnavailableException ex) {
+
+        Map<String, Object> response =
+                new HashMap<>();
+
+        response.put(
+                "status",
+                503
+        );
+
+        response.put(
+                "error",
+                "SERVICE_UNAVAILABLE"
+        );
+
+        response.put(
+                "message",
+                "Login is temporarily unavailable. " +
+                        "Please try again later."
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(response);
+    }
     // =========================================================
     // INVALID CREDENTIALS
     // =========================================================

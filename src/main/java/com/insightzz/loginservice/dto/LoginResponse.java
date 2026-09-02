@@ -13,7 +13,7 @@ public class LoginResponse {
 
     private long expiresIn;
 
-    private Integer userId;
+    private Long userId;
 
     private String username;
 

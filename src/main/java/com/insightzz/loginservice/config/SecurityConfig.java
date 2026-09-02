@@ -25,7 +25,9 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-
+                        .requestMatchers(
+                                "/internal/**"
+                        ).permitAll()
                         .requestMatchers(
                                 "/api/v1/auth/login",
                                 "/actuator/health"
