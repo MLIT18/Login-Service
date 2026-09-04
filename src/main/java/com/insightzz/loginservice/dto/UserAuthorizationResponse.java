@@ -14,6 +14,6 @@ import java.util.List;
 public class UserAuthorizationResponse {
 
     private Long userId;
-
+    private List<String> authorities;
     private List<ProjectAuthorizationResponse> projects;
 }

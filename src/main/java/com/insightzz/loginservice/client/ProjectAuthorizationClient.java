@@ -5,7 +5,7 @@ import com.insightzz.loginservice.dto.UserAuthorizationResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
         name = "project-stage-service",
@@ -16,6 +16,7 @@ public interface ProjectAuthorizationClient {
 
     @GetMapping("/internal/authorization/users/{userId}")
     UserAuthorizationResponse getUserAuthorization(
-            @PathVariable("userId") Long userId
+            @PathVariable("userId") Long userId,
+            @RequestParam("roleId") Integer roleId
     );
 }

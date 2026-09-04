@@ -42,10 +42,7 @@ public class JwtUtil {
             UserAuthorizationResponse authorization,
             Long tokenVersion) {
 
-
-        Date now =
-                new Date();
-
+        Date now = new Date();
 
         Date expiry =
                 new Date(
@@ -55,77 +52,43 @@ public class JwtUtil {
 
         return Jwts.builder()
 
-                // =============================================
-                // SUBJECT
-                // =============================================
-
                 .subject(username)
-
-
-                // =============================================
-                // USER
-                // =============================================
 
                 .claim(
                         "userId",
                         userId
                 )
 
-
-                // =============================================
-                // ROLE
-                // =============================================
-
                 .claim(
                         "role",
                         role
                 )
 
-
-                // =============================================
-                // GLOBAL PERMISSIONS
-                // =============================================
-
                 .claim(
                         "authorities",
-                        authorities
-                )
-
-
-                // =============================================
-                // PROJECT/STAGE SCOPE
-                // =============================================
-
-                .claim(
-                        "projectScopes",
-                        authorization != null
-                                ? authorization.getProjects()
+                        authorities != null
+                                ? authorities
                                 : List.of()
                 )
 
+                .claim(
+                        "projectScopes",
+                        authorization != null &&
+                                authorization.getProjects() != null
 
-                // =============================================
-                // TOKEN VERSION
-                // =============================================
+                                ? authorization.getProjects()
+
+                                : List.of()
+                )
 
                 .claim(
                         "tokenVersion",
                         tokenVersion
                 )
 
-
-                // =============================================
-                // TIMESTAMPS
-                // =============================================
-
                 .issuedAt(now)
 
                 .expiration(expiry)
-
-
-                // =============================================
-                // SIGN
-                // =============================================
 
                 .signWith(secretKey)
 

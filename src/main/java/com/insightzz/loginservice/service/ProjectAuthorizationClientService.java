@@ -19,14 +19,19 @@ public class ProjectAuthorizationClientService {
             fallbackMethod = "projectAuthorizationFallback"
     )
     public UserAuthorizationResponse getAuthorization(
-            Long userId) {
+            Long userId,
+            Integer roleId) {
 
         return projectAuthorizationClient
-                .getUserAuthorization(userId);
+                .getUserAuthorization(
+                        userId,
+                        roleId
+                );
     }
 
     private UserAuthorizationResponse projectAuthorizationFallback(
             Long userId,
+            Integer roleId,
             Throwable throwable) {
 
         throw new ProjectAuthorizationUnavailableException(

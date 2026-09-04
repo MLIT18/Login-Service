@@ -1,6 +1,5 @@
 package com.insightzz.loginservice.service;
 
-import com.insightzz.loginservice.client.ProjectAuthorizationClient;
 import com.insightzz.loginservice.dto.LoginRequest;
 import com.insightzz.loginservice.dto.LoginResponse;
 import com.insightzz.loginservice.dto.UserAuthorizationResponse;
@@ -10,7 +9,6 @@ import com.insightzz.loginservice.exception.InvalidCredentialsException;
 import com.insightzz.loginservice.repository.UserRepository;
 import com.insightzz.loginservice.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,37 +24,36 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtUtil jwtUtil;
 
-    private final RolePermissionService rolePermissionService;
-
-    private final ProjectAuthorizationClient
-            projectAuthorizationClient;
     private final ProjectAuthorizationClientService
             projectAuthorizationClientService;
 
-//    @Value("${internal.security.api-key}")
-//    private String internalApiKey;
     @Override
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(
+            LoginRequest request) {
 
-        // =====================================================
-        // 1. FIND USER
-        // =====================================================
+        /*
+         * ------------------------------------------
+         * 1. Find user
+         * ------------------------------------------
+         */
 
         User user =
                 userRepository
                         .findByUserEmail(
                                 request.getUserEmail()
                         )
-                        .orElseThrow(() ->
-                                new InvalidCredentialsException(
+                        .orElseThrow(
+                                () -> new InvalidCredentialsException(
                                         "Invalid username or password"
                                 )
                         );
 
 
-        // =====================================================
-        // 2. CHECK USER ACTIVE
-        // =====================================================
+        /*
+         * ------------------------------------------
+         * 2. Active check
+         * ------------------------------------------
+         */
 
         if (user.getIsActive() == null ||
                 user.getIsActive() != 1) {
@@ -67,9 +64,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
 
-        // =====================================================
-        // 3. VERIFY PASSWORD
-        // =====================================================
+        /*
+         * ------------------------------------------
+         * 3. Password check
+         * ------------------------------------------
+         */
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
@@ -81,9 +80,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
 
-        // =====================================================
-        // 4. GET ROLE
-        // =====================================================
+        /*
+         * ------------------------------------------
+         * 4. Role check
+         * ------------------------------------------
+         */
 
         if (user.getRole() == null) {
 
@@ -93,50 +94,75 @@ public class AuthServiceImpl implements AuthService {
         }
 
 
+        /*
+         * ------------------------------------------
+         * 5. Get role + roleId
+         * ------------------------------------------
+         */
+
         String role =
                 user.getRole()
                         .getRoleName()
                         .toUpperCase();
 
-
-        // =====================================================
-        // 5. GET GLOBAL ROLE PERMISSIONS
-        // =====================================================
-
-        List<String> permissions =
-                rolePermissionService
-                        .getPermissions(role);
+        Integer roleId =
+                user.getRole()
+                        .getId();
 
 
-        // =====================================================
-        // 6. GET PROJECT/STAGE AUTHORIZATION
-        // =====================================================
+        /*
+         * ------------------------------------------
+         * 6. Get authorization from
+         *    project-stage-service
+         * ------------------------------------------
+         */
 
         UserAuthorizationResponse authorization =
                 projectAuthorizationClientService
                         .getAuthorization(
-                                user.getUserId()
+                                user.getUserId(),
+                                roleId
                         );
 
 
-        // =====================================================
-        // 7. GENERATE JWT
-        // =====================================================
+        /*
+         * ------------------------------------------
+         * 7. Authorities now come from
+         *    project-stage-service
+         * ------------------------------------------
+         */
+
+        List<String> authorities =
+                authorization != null &&
+                        authorization.getAuthorities() != null
+
+                        ? authorization.getAuthorities()
+
+                        : List.of();
+
+
+        /*
+         * ------------------------------------------
+         * 8. Generate JWT
+         * ------------------------------------------
+         */
 
         String token =
                 jwtUtil.generateToken(
                         user.getUserId(),
                         user.getUserEmail(),
                         role,
-                        permissions,
+                        authorities,
                         authorization,
                         user.getTokenVersion()
                 );
 
 
-        // =====================================================
-        // 8. RETURN LOGIN RESPONSE
-        // =====================================================
+        /*
+         * ------------------------------------------
+         * 9. Response
+         * ------------------------------------------
+         */
 
         return LoginResponse.builder()
                 .accessToken(token)
